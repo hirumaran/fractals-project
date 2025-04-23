@@ -168,12 +168,12 @@
                 <button onclick="toggleColorCycle()">Toggle Color Cycle</button>
                 <div class="slider-container">
                     <label for="maxIterations">Max Iterations:</label>
-                    <input type="range" id="maxIterations" min="50" max="200" value="100" onchange="updateMaxIterations()">
-                    <span id="maxIterationsValue">100</span>
+                    <input type="range" id="maxIterations" min="100" max="500" value="200" onchange="updateMaxIterations()">
+                    <span id="maxIterationsValue">200</span>
                 </div>
                 <div class="slider-container">
                     <label for="colorSpeed">Color Speed:</label>
-                    <input type="range" id="colorSpeed" min="1" max="10" value="5" onchange="updateColorSpeed()">
+                    <input type="range" id="colorSpeed" min="1" max="20" value="5" onchange="updateColorSpeed()">
                     <span id="colorSpeedValue">5</span>
                 </div>
             </div>
@@ -190,14 +190,22 @@
 
         // Julia set parameters
         let c = { real: -0.7, imag: 0.27 };
-        let maxIterations = 100;
-        const zoom = 1.5;
+        let maxIterations = 200;
+        const zoom = 1.8;
         const offsetX = 0;
         const offsetY = 0;
         let colorOffset = 0;
         let isColorCycling = false;
         let colorSpeed = 5;
         let animationFrameId = null;
+        let colorScheme = 'rainbow';
+
+        // Function to check if parameters will produce a good fractal
+        function isValidFractalParams(real, imag) {
+            // Check if the point is in the interesting region of the Julia set
+            const magnitude = Math.sqrt(real * real + imag * imag);
+            return magnitude > 0.2 && magnitude < 0.8;
+        }
 
         function generateJuliaSet() {
             const imageData = ctx.createImageData(width, height);
@@ -212,6 +220,7 @@
 
                     let z = { ...z0 };
                     let iteration = 0;
+                    let smoothIteration = 0;
 
                     while (z.real * z.real + z.imag * z.imag < 4 && iteration < maxIterations) {
                         const temp = z.real * z.real - z.imag * z.imag + c.real;
@@ -220,14 +229,43 @@
                         iteration++;
                     }
 
+                    if (iteration < maxIterations) {
+                        smoothIteration = iteration + 1 - Math.log(Math.log(Math.sqrt(z.real * z.real + z.imag * z.imag))) / Math.log(2);
+                    }
+
                     const idx = (x + y * width) * 4;
                     if (iteration === maxIterations) {
                         data[idx] = 0;
                         data[idx + 1] = 0;
                         data[idx + 2] = 0;
                     } else {
-                        const hue = ((iteration / maxIterations) * 360 + colorOffset) % 360;
-                        const rgb = hslToRgb(hue / 360, 1, 0.5);
+                        const normalizedIteration = smoothIteration / maxIterations;
+                        let rgb;
+                        
+                        switch(colorScheme) {
+                            case 'rainbow':
+                                const hue = (normalizedIteration * 360 + colorOffset) % 360;
+                                rgb = hslToRgb(hue / 360, 1, 0.5);
+                                break;
+                            case 'fire':
+                                rgb = [
+                                    Math.min(255, Math.floor(normalizedIteration * 510)),
+                                    Math.min(255, Math.floor(normalizedIteration * 255)),
+                                    Math.min(255, Math.floor(normalizedIteration * 128))
+                                ];
+                                break;
+                            case 'ocean':
+                                rgb = [
+                                    Math.min(255, Math.floor(normalizedIteration * 128)),
+                                    Math.min(255, Math.floor(normalizedIteration * 255)),
+                                    Math.min(255, Math.floor(normalizedIteration * 510))
+                                ];
+                                break;
+                            default:
+                                const hue2 = (normalizedIteration * 360 + colorOffset) % 360;
+                                rgb = hslToRgb(hue2 / 360, 1, 0.5);
+                        }
+                        
                         data[idx] = rgb[0];
                         data[idx + 1] = rgb[1];
                         data[idx + 2] = rgb[2];
@@ -265,13 +303,30 @@
         }
 
         function generateNewFractal() {
-            // Generate more interesting parameters
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 0.5 + Math.random() * 0.5;
-            c = {
-                real: Math.cos(angle) * radius,
-                imag: Math.sin(angle) * radius
-            };
+            let attempts = 0;
+            const maxAttempts = 10;
+            let validParams = false;
+
+            while (!validParams && attempts < maxAttempts) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 0.4 + Math.random() * 0.4;
+                const real = Math.cos(angle) * radius;
+                const imag = Math.sin(angle) * radius;
+
+                if (isValidFractalParams(real, imag)) {
+                    c = { real, imag };
+                    validParams = true;
+                }
+                attempts++;
+            }
+
+            if (!validParams) {
+                c = { real: -0.7, imag: 0.27 };
+            }
+            
+            const schemes = ['rainbow', 'fire', 'ocean'];
+            colorScheme = schemes[Math.floor(Math.random() * schemes.length)];
+            
             generateJuliaSet();
         }
 
