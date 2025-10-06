@@ -5,136 +5,356 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Julia Set Fractal Generator</title>
     <style>
-        body {
+        * {
             margin: 0;
-            background-color: #1a1a1a;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
             color: white;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            scroll-behavior: smooth;
+            overflow-x: hidden;
         }
+        
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 0 20px;
         }
+        
         .page {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
             position: relative;
         }
+        
         .about-section {
-            background-color: #1a1a1a;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
         }
+        
         .project-section {
-            background-color: #222;
-            border-top: 2px solid #4CAF50;
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            position: relative;
         }
+        
+        .project-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0, #4CAF50);
+            background-size: 300% 100%;
+            animation: gradient-shift 8s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
         .profile-image {
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
             object-fit: cover;
             object-position: center 30%;
-            margin-bottom: 20px;
-            border: 3px solid #4CAF50;
-            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+            margin-bottom: 30px;
+            border: 4px solid #4CAF50;
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.4);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
         }
+        
+        .profile-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(76, 175, 80, 0.6);
+        }
+        
         .about-content {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px;
             background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
         canvas {
-            border: 1px solid #333;
+            border: 2px solid rgba(255, 255, 255, 0.1);
             margin: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            background-color: #f0e6ff;
+            cursor: crosshair;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        
+        canvas:hover {
+            transform: scale(1.01);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+        
         .controls {
-            margin: 10px;
+            margin: 20px 0;
             display: flex;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 15px;
             justify-content: center;
             background-color: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 200px;
+        }
+        
         button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
         }
+        
         button:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
         }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
         .slider-container {
             display: flex;
             align-items: center;
             gap: 10px;
             color: white;
         }
+        
         input[type="range"] {
             width: 150px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
         }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #45a049;
+            transform: scale(1.2);
+        }
+        
         .credit {
             margin: 15px 0;
-            font-size: 1.1em;
-            color: white;
+            font-size: 1.2em;
+            color: #4CAF50;
             text-align: center;
             font-weight: 500;
+            letter-spacing: 1px;
         }
+        
         h1 {
-            font-size: 2.5em;
+            font-size: 3em;
             margin-bottom: 20px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-text 8s ease infinite;
+            background-size: 200% auto;
         }
+        
+        @keyframes gradient-text {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+        
         h2 {
-            font-size: 2em;
-            margin-bottom: 20px;
+            font-size: 2.2em;
+            margin-bottom: 25px;
             color: #4CAF50;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
+        
         .about-text {
             font-size: 1.2em;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: left;
             line-height: 1.8;
         }
+        
         .scroll-indicator {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #4CAF50;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
+            padding: 15px 25px;
+            border-radius: 30px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
             z-index: 1000;
+            font-weight: 600;
         }
+        
         .scroll-indicator:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
-        .page-divider {
-            height: 4px;
-            background: linear-gradient(to right, transparent, #4CAF50, transparent);
-            margin: 0;
+        
+        .preset-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .preset-fractal {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .preset-fractal:hover {
+            transform: scale(1.05);
+            border-color: #4CAF50;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .info-panel {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             width: 100%;
+            max-width: 800px;
+        }
+        
+        .param-display {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .zoom-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            padding: 0;
+        }
+        
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        .loading-indicator.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .color-scheme-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        
+        .color-scheme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .color-scheme-btn:hover {
+            transform: scale(1.1);
+            border-color: white;
+        }
+        
+        .color-scheme-btn.active {
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 1.8em; }
+            .controls { padding: 15px; }
+            canvas { width: 100%; max-width: 500px; height: auto; }
         }
     </style>
 </head>
@@ -142,7 +362,7 @@
     <div class="container">
         <section class="page about-section">
             <h1>Thirumaran Deepak</h1>
-            <img src="Image.jpeg" alt="Thirumaran" class="profile-image">
+            <img src="https://picsum.photos/seed/thirumaran/220/220.jpg" alt="Thirumaran" class="profile-image">
             <div class="about-content">
                 <h2>About Me</h2>
                 <p class="about-text">
@@ -157,24 +377,78 @@
             </div>
         </section>
 
-        <hr class="page-divider">
-
         <section class="page project-section">
             <h2>Julia Set Fractal Generator</h2>
             <div class="credit">Created by Thirumaran</div>
-            <canvas id="fractalCanvas" width="800" height="600"></canvas>
-            <div class="controls">
-                <button onclick="generateNewFractal()">Generate New Fractal</button>
-                <button onclick="toggleColorCycle()">Toggle Color Cycle</button>
-                <div class="slider-container">
-                    <label for="maxIterations">Max Iterations:</label>
-                    <input type="range" id="maxIterations" min="100" max="500" value="200" onchange="updateMaxIterations()">
-                    <span id="maxIterationsValue">200</span>
+            
+            <div class="info-panel">
+                <div class="param-display">
+                    <span>Julia Set Parameters:</span>
+                    <span id="paramDisplay">c = -0.7 + 0.27i</span>
                 </div>
-                <div class="slider-container">
-                    <label for="colorSpeed">Color Speed:</label>
-                    <input type="range" id="colorSpeed" min="1" max="20" value="5" onchange="updateColorSpeed()">
-                    <span id="colorSpeedValue">5</span>
+                <div class="param-display">
+                    <span>Zoom Level:</span>
+                    <span id="zoomDisplay">1.0x</span>
+                </div>
+                <div class="param-display">
+                    <span>Center Position:</span>
+                    <span id="centerDisplay">(0, 0)</span>
+                </div>
+            </div>
+            
+            <div style="position: relative;">
+                <canvas id="fractalCanvas" width="800" height="600"></canvas>
+                <div class="loading-indicator" id="loadingIndicator">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <button onclick="generateNewFractal()">Generate New Fractal</button>
+                    <button onclick="toggleColorCycle()">Toggle Color Cycle</button>
+                    <button onclick="resetView()">Reset View</button>
+                    <button onclick="saveFractal()">Save Fractal</button>
+                </div>
+                
+                <div class="control-group">
+                    <div class="slider-container">
+                        <label for="maxIterations">Max Iterations:</label>
+                        <input type="range" id="maxIterations" min="50" max="500" value="200" onchange="updateMaxIterations()">
+                        <span id="maxIterationsValue">200</span>
+                    </div>
+                    <div class="slider-container">
+                        <label for="colorSpeed">Color Speed:</label>
+                        <input type="range" id="colorSpeed" min="1" max="20" value="5" onchange="updateColorSpeed()">
+                        <span id="colorSpeedValue">5</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="zoom-controls">
+                        <button class="zoom-button" onclick="zoomIn()">+</button>
+                        <button class="zoom-button" onclick="zoomOut()">-</button>
+                        <button onclick="fitToScreen()">Fit to Screen</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3 style="margin-bottom: 10px; color: #4CAF50;">Color Schemes</h3>
+                <div class="color-scheme-selector">
+                    <div class="color-scheme-btn active" style="background: linear-gradient(45deg, red, yellow, green, blue, purple)" onclick="setColorScheme('rainbow')" title="Rainbow"></div>
+                    <div class="color-scheme-btn" style="background: linear-gradient(45deg, #1a237e, #64b5f6, #ffeb3b)" onclick="setColorScheme('ocean_sunset')" title="Ocean Sunset"></div>
+                    <div class="color-scheme-btn" style="background: linear-gradient(45deg, #311b92, #7b1fa2, #e91e63)" onclick="setColorScheme('cosmic')" title="Cosmic"></div>
+                    <div class="color-scheme-btn" style="background: linear-gradient(45deg, #0d47a1, #29b6f6, #ffeb3b, #9e9e9e)" onclick="setColorScheme('electric')" title="Electric"></div>
+                    <div class="color-scheme-btn" style="background: linear-gradient(45deg, #1a0033, #4a148c, #7b1fa2, #ffd54f)" onclick="setColorScheme('deep_space')" title="Deep Space"></div>
+                    <div class="color-scheme-btn" style="background: linear-gradient(45deg, #004d40, #00897b, #aeea00, #ffeb3b)" onclick="setColorScheme('aurora')" title="Aurora"></div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3 style="margin-bottom: 10px; color: #4CAF50;">Preset Fractals</h3>
+                <div class="preset-gallery" id="presetGallery">
+                    <!-- Preset fractals will be added here -->
                 </div>
             </div>
         </section>
@@ -189,82 +463,145 @@
         const height = canvas.height;
 
         // Julia set parameters
-        let c = { real: -0.7, imag: 0.27 };
+        let c = { real: -0.4, imag: 0.6 }; // Starting with a spiral-like fractal
         let maxIterations = 200;
-        const zoom = 1.8;
-        const offsetX = 0;
-        const offsetY = 0;
+        let zoom = 1.0;
+        let offsetX = 0;
+        let offsetY = 0;
         let colorOffset = 0;
         let isColorCycling = false;
         let colorSpeed = 5;
         let animationFrameId = null;
-        let colorScheme = 'rainbow';
+        let colorScheme = 'ocean_sunset'; // Default to ocean_sunset which matches the provided image
 
-        // Function to check if parameters will produce a good fractal
-        function isValidFractalParams(real, imag) {
-            // Check if the point is in the interesting region of the Julia set
-            const magnitude = Math.sqrt(real * real + imag * imag);
-            return magnitude > 0.2 && magnitude < 0.8;
+        // Interesting Julia set parameters
+        const interestingParams = [
+            { real: -0.4, imag: 0.6, name: "Classic Spiral" },
+            { real: 0.285, imag: 0.01, name: "Dragon" },
+            { real: -0.8, imag: 0.156, name: "Dendrite" },
+            { real: -0.7269, imag: 0.1889, name: "Siegel Disk" },
+            { real: -0.835, imag: -0.2321, name: "Douady Rabbit" },
+            { real: -0.70176, imag: -0.3842, name: "San Marco" },
+            { real: 0.45, imag: 0.1428, name: "Spiral Galaxy" },
+            { real: -0.75, imag: 0.11, name: "Lightning" },
+            { real: -0.1, imag: 0.651, name: "Swirl" },
+            { real: -0.123, imag: 0.745, name: "Dendrite-like" },
+            { real: 0.3, imag: -0.5, name: "Galaxy" },
+            { real: -0.74543, imag: 0.11301, name: "Mandelbrot-like" }
+        ];
+
+        // Color schemes
+        const colorSchemes = {
+            rainbow: { type: 'hsl', saturation: 1, lightness: 0.5 },
+            ocean_sunset: { 
+                type: 'gradient', 
+                colors: [
+                    { pos: 0, r: 0.04, g: 0.04, b: 0.12 },      // Deep blue
+                    { pos: 0.2, r: 0.08, g: 0.16, b: 0.32 },    // Medium blue
+                    { pos: 0.4, r: 0.18, g: 0.32, b: 0.8 },     // Light blue
+                    { pos: 0.6, r: 0.9, g: 0.8, b: 0.2 },       // Yellow
+                    { pos: 0.8, r: 0.7, g: 0.7, b: 0.7 }        // Gray
+                ]
+            },
+            cosmic: { 
+                type: 'gradient', 
+                colors: [
+                    { pos: 0, r: 0.05, g: 0.05, b: 0.2 },       // Deep purple
+                    { pos: 0.2, r: 0.2, g: 0.1, b: 0.5 },       // Purple
+                    { pos: 0.4, r: 0.6, g: 0.2, b: 0.8 },       // Magenta
+                    { pos: 0.6, r: 0.9, g: 0.7, b: 0.3 },       // Orange
+                    { pos: 0.8, r: 0.7, g: 0.7, b: 0.7 }        // Gray
+                ]
+            },
+            electric: { 
+                type: 'gradient', 
+                colors: [
+                    { pos: 0, r: 0.0, g: 0.0, b: 0.1 },         // Near black
+                    { pos: 0.2, r: 0.0, g: 0.2, b: 0.8 },       // Blue
+                    { pos: 0.4, r: 0.9, g: 0.9, b: 0.1 },       // Yellow
+                    { pos: 0.6, r: 0.5, g: 0.5, b: 0.5 },       // Gray
+                    { pos: 0.8, r: 0.9, g: 0.9, b: 0.1 }        // Yellow
+                ]
+            },
+            deep_space: { 
+                type: 'gradient', 
+                colors: [
+                    { pos: 0, r: 0.05, g: 0.0, b: 0.1 },        // Deep purple
+                    { pos: 0.2, r: 0.1, g: 0.0, b: 0.4 },       // Purple
+                    { pos: 0.4, r: 0.3, g: 0.1, b: 0.7 },       // Blue-purple
+                    { pos: 0.6, r: 0.8, g: 0.6, b: 0.2 },       // Yellow-orange
+                    { pos: 0.8, r: 0.7, g: 0.7, b: 0.7 }        // Gray
+                ]
+            },
+            aurora: { 
+                type: 'gradient', 
+                colors: [
+                    { pos: 0, r: 0.0, g: 0.1, b: 0.2 },         // Dark blue
+                    { pos: 0.2, r: 0.0, g: 0.5, b: 0.5 },       // Teal
+                    { pos: 0.4, r: 0.5, g: 0.9, b: 0.3 },       // Green
+                    { pos: 0.6, r: 0.9, g: 0.9, b: 0.5 },       // Light yellow
+                    { pos: 0.8, r: 0.7, g: 0.7, b: 0.7 }        // Gray
+                ]
+            }
+        };
+
+        // Initialize preset gallery
+        function initPresetGallery() {
+            const gallery = document.getElementById('presetGallery');
+            
+            interestingParams.forEach((param, index) => {
+                const presetCanvas = document.createElement('canvas');
+                presetCanvas.className = 'preset-fractal';
+                presetCanvas.width = 120;
+                presetCanvas.height = 120;
+                presetCanvas.title = param.name;
+                presetCanvas.onclick = () => loadPreset(param);
+                
+                // Generate a small preview of the preset
+                generatePresetPreview(presetCanvas, param);
+                
+                gallery.appendChild(presetCanvas);
+            });
         }
 
-        function generateJuliaSet() {
-            const imageData = ctx.createImageData(width, height);
+        // Generate a preview of a preset fractal
+        function generatePresetPreview(previewCanvas, params) {
+            const previewCtx = previewCanvas.getContext('2d');
+            const previewWidth = previewCanvas.width;
+            const previewHeight = previewCanvas.height;
+            
+            const imageData = previewCtx.createImageData(previewWidth, previewHeight);
             const data = imageData.data;
-
-            for (let x = 0; x < width; x++) {
-                for (let y = 0; y < height; y++) {
+            
+            const tempC = c;
+            c = params;
+            
+            for (let x = 0; x < previewWidth; x++) {
+                for (let y = 0; y < previewHeight; y++) {
                     const z0 = {
-                        real: (x - width/2) / (0.5 * zoom * width) + offsetX,
-                        imag: (y - height/2) / (0.5 * zoom * height) + offsetY
+                        real: (x - previewWidth/2) / (0.5 * 1.8 * previewWidth),
+                        imag: (y - previewHeight/2) / (0.5 * 1.8 * previewHeight)
                     };
 
                     let z = { ...z0 };
                     let iteration = 0;
-                    let smoothIteration = 0;
 
-                    while (z.real * z.real + z.imag * z.imag < 4 && iteration < maxIterations) {
+                    while (z.real * z.real + z.imag * z.imag < 4 && iteration < 100) {
                         const temp = z.real * z.real - z.imag * z.imag + c.real;
                         z.imag = 2 * z.real * z.imag + c.imag;
                         z.real = temp;
                         iteration++;
                     }
 
-                    if (iteration < maxIterations) {
-                        smoothIteration = iteration + 1 - Math.log(Math.log(Math.sqrt(z.real * z.real + z.imag * z.imag))) / Math.log(2);
-                    }
-
-                    const idx = (x + y * width) * 4;
-                    if (iteration === maxIterations) {
+                    const idx = (x + y * previewWidth) * 4;
+                    if (iteration === 100) {
                         data[idx] = 0;
                         data[idx + 1] = 0;
                         data[idx + 2] = 0;
                     } else {
-                        const normalizedIteration = smoothIteration / maxIterations;
-                        let rgb;
-                        
-                        switch(colorScheme) {
-                            case 'rainbow':
-                                const hue = (normalizedIteration * 360 + colorOffset) % 360;
-                                rgb = hslToRgb(hue / 360, 1, 0.5);
-                                break;
-                            case 'fire':
-                                rgb = [
-                                    Math.min(255, Math.floor(normalizedIteration * 510)),
-                                    Math.min(255, Math.floor(normalizedIteration * 255)),
-                                    Math.min(255, Math.floor(normalizedIteration * 128))
-                                ];
-                                break;
-                            case 'ocean':
-                                rgb = [
-                                    Math.min(255, Math.floor(normalizedIteration * 128)),
-                                    Math.min(255, Math.floor(normalizedIteration * 255)),
-                                    Math.min(255, Math.floor(normalizedIteration * 510))
-                                ];
-                                break;
-                            default:
-                                const hue2 = (normalizedIteration * 360 + colorOffset) % 360;
-                                rgb = hslToRgb(hue2 / 360, 1, 0.5);
-                        }
+                        const normalizedIteration = iteration / 100;
+                        const hue = normalizedIteration * 360;
+                        const rgb = hslToRgb(hue / 360, 1, 0.5);
                         
                         data[idx] = rgb[0];
                         data[idx + 1] = rgb[1];
@@ -273,10 +610,152 @@
                     data[idx + 3] = 255;
                 }
             }
-
-            ctx.putImageData(imageData, 0, 0);
+            
+            previewCtx.putImageData(imageData, 0, 0);
+            c = tempC;
         }
 
+        // Load a preset fractal
+        function loadPreset(params) {
+            c = { ...params };
+            updateParamDisplay();
+            generateJuliaSet();
+        }
+
+        // Update parameter display
+        function updateParamDisplay() {
+            document.getElementById('paramDisplay').textContent = 
+                `c = ${c.real.toFixed(3)} + ${c.imag.toFixed(3)}i`;
+            document.getElementById('zoomDisplay').textContent = `${zoom.toFixed(2)}x`;
+            document.getElementById('centerDisplay').textContent = 
+                `(${offsetX.toFixed(3)}, ${offsetY.toFixed(3)})`;
+        }
+
+        // Generate Julia set fractal
+        function generateJuliaSet() {
+            showLoadingIndicator();
+            
+            setTimeout(() => {
+                const imageData = ctx.createImageData(width, height);
+                const data = imageData.data;
+
+                for (let x = 0; x < width; x++) {
+                    for (let y = 0; y < height; y++) {
+                        const z0 = {
+                            real: (x - width/2) / (0.5 * zoom * width) + offsetX,
+                            imag: (y - height/2) / (0.5 * zoom * height) + offsetY
+                        };
+
+                        let z = { ...z0 };
+                        let iteration = 0;
+                        let smoothIteration = 0;
+
+                        while (z.real * z.real + z.imag * z.imag < 4 && iteration < maxIterations) {
+                            const temp = z.real * z.real - z.imag * z.imag + c.real;
+                            z.imag = 2 * z.real * z.imag + c.imag;
+                            z.real = temp;
+                            iteration++;
+                        }
+
+                        if (iteration < maxIterations) {
+                            smoothIteration = iteration + 1 - Math.log(Math.log(Math.sqrt(z.real * z.real + z.imag * z.imag))) / Math.log(2);
+                        }
+
+                        const idx = (x + y * width) * 4;
+                        if (iteration === maxIterations) {
+                            data[idx] = 0;
+                            data[idx + 1] = 0;
+                            data[idx + 2] = 0;
+                        } else {
+                            const normalizedIteration = smoothIteration / maxIterations;
+                            let rgb;
+                            
+                            if (colorSchemes[colorScheme].type === 'hsl') {
+                                const hue = (normalizedIteration * 360 + colorOffset) % 360;
+                                rgb = hslToRgb(hue / 360, colorSchemes[colorScheme].saturation, colorSchemes[colorScheme].lightness);
+                            } else {
+                                // Gradient color scheme
+                                rgb = getGradientColor(normalizedIteration, colorSchemes[colorScheme].colors);
+                                
+                                // Apply color offset if cycling
+                                if (isColorCycling) {
+                                    const hueShift = colorOffset / 360;
+                                    rgb = shiftHue(rgb, hueShift);
+                                }
+                            }
+                            
+                            data[idx] = rgb[0];
+                            data[idx + 1] = rgb[1];
+                            data[idx + 2] = rgb[2];
+                        }
+                        data[idx + 3] = 255;
+                    }
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                hideLoadingIndicator();
+            }, 10);
+        }
+
+        // Get color from gradient
+        function getGradientColor(position, colors) {
+            // Find the two colors to interpolate between
+            let lowerColor = colors[0];
+            let upperColor = colors[colors.length - 1];
+            
+            for (let i = 0; i < colors.length - 1; i++) {
+                if (position >= colors[i].pos && position <= colors[i + 1].pos) {
+                    lowerColor = colors[i];
+                    upperColor = colors[i + 1];
+                    break;
+                }
+            }
+            
+            // Calculate the interpolation factor
+            const range = upperColor.pos - lowerColor.pos;
+            const factor = range > 0 ? (position - lowerColor.pos) / range : 0;
+            
+            // Interpolate between the two colors
+            const r = Math.floor((lowerColor.r + (upperColor.r - lowerColor.r) * factor) * 255);
+            const g = Math.floor((lowerColor.g + (upperColor.g - lowerColor.g) * factor) * 255);
+            const b = Math.floor((lowerColor.b + (upperColor.b - lowerColor.b) * factor) * 255);
+            
+            return [r, g, b];
+        }
+
+        // Shift hue of RGB color
+        function shiftHue(rgb, hueShift) {
+            // Convert RGB to HSL
+            const r = rgb[0] / 255;
+            const g = rgb[1] / 255;
+            const b = rgb[2] / 255;
+            
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            
+            if (max === min) {
+                h = s = 0; // achromatic
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            
+            // Shift hue
+            h = (h + hueShift) % 1;
+            if (h < 0) h += 1;
+            
+            // Convert back to RGB
+            return hslToRgb(h, s, l);
+        }
+
+        // HSL to RGB conversion
         function hslToRgb(h, s, l) {
             let r, g, b;
 
@@ -302,34 +781,25 @@
             return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
         }
 
+        // Generate new random fractal
         function generateNewFractal() {
-            let attempts = 0;
-            const maxAttempts = 10;
-            let validParams = false;
-
-            while (!validParams && attempts < maxAttempts) {
+            // 70% chance to use predefined interesting parameters
+            if (Math.random() < 0.7) {
+                const randomIndex = Math.floor(Math.random() * interestingParams.length);
+                c = { ...interestingParams[randomIndex] };
+            } else {
+                // Generate random parameters within a range that tends to produce interesting fractals
                 const angle = Math.random() * Math.PI * 2;
-                const radius = 0.4 + Math.random() * 0.4;
-                const real = Math.cos(angle) * radius;
-                const imag = Math.sin(angle) * radius;
-
-                if (isValidFractalParams(real, imag)) {
-                    c = { real, imag };
-                    validParams = true;
-                }
-                attempts++;
-            }
-
-            if (!validParams) {
-                c = { real: -0.7, imag: 0.27 };
+                const radius = 0.2 + Math.random() * 0.6;
+                c.real = Math.cos(angle) * radius;
+                c.imag = Math.sin(angle) * radius;
             }
             
-            const schemes = ['rainbow', 'fire', 'ocean'];
-            colorScheme = schemes[Math.floor(Math.random() * schemes.length)];
-            
+            updateParamDisplay();
             generateJuliaSet();
         }
 
+        // Toggle color cycling
         function toggleColorCycle() {
             isColorCycling = !isColorCycling;
             if (isColorCycling) {
@@ -339,6 +809,7 @@
             }
         }
 
+        // Animate colors
         function animateColors() {
             colorOffset = (colorOffset + colorSpeed) % 360;
             generateJuliaSet();
@@ -347,23 +818,141 @@
             }
         }
 
+        // Update max iterations
         function updateMaxIterations() {
             maxIterations = parseInt(document.getElementById('maxIterations').value);
             document.getElementById('maxIterationsValue').textContent = maxIterations;
             generateJuliaSet();
         }
 
+        // Update color speed
         function updateColorSpeed() {
             colorSpeed = parseInt(document.getElementById('colorSpeed').value);
             document.getElementById('colorSpeedValue').textContent = colorSpeed;
         }
 
-        // Initial generation
-        generateJuliaSet();
+        // Set color scheme
+        function setColorScheme(scheme) {
+            colorScheme = scheme;
+            
+            // Update active button
+            document.querySelectorAll('.color-scheme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            generateJuliaSet();
+        }
 
+        // Zoom in
+        function zoomIn() {
+            zoom *= 1.5;
+            updateParamDisplay();
+            generateJuliaSet();
+        }
+
+        // Zoom out
+        function zoomOut() {
+            zoom /= 1.5;
+            updateParamDisplay();
+            generateJuliaSet();
+        }
+
+        // Reset view
+        function resetView() {
+            zoom = 1.0;
+            offsetX = 0;
+            offsetY = 0;
+            updateParamDisplay();
+            generateJuliaSet();
+        }
+
+        // Fit to screen
+        function fitToScreen() {
+            zoom = 1.0;
+            offsetX = 0;
+            offsetY = 0;
+            updateParamDisplay();
+            generateJuliaSet();
+        }
+
+        // Save fractal
+        function saveFractal() {
+            const link = document.createElement('a');
+            link.download = `julia_set_${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Show loading indicator
+        function showLoadingIndicator() {
+            document.getElementById('loadingIndicator').classList.add('active');
+        }
+
+        // Hide loading indicator
+        function hideLoadingIndicator() {
+            document.getElementById('loadingIndicator').classList.remove('active');
+        }
+
+        // Handle canvas click for panning
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Convert click position to fractal coordinates
+            const fractalX = (x - width/2) / (0.5 * zoom * width) + offsetX;
+            const fractalY = (y - height/2) / (0.5 * zoom * height) + offsetY;
+            
+            // Center on the clicked position
+            offsetX = fractalX;
+            offsetY = fractalY;
+            
+            updateParamDisplay();
+            generateJuliaSet();
+        });
+
+        // Handle canvas wheel for zooming
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Convert mouse position to fractal coordinates before zoom
+            const fractalX = (x - width/2) / (0.5 * zoom * width) + offsetX;
+            const fractalY = (y - height/2) / (0.5 * zoom * height) + offsetY;
+            
+            // Zoom in or out
+            if (e.deltaY < 0) {
+                zoom *= 1.2;
+            } else {
+                zoom /= 1.2;
+            }
+            
+            // Adjust offset to keep the mouse position fixed
+            offsetX = fractalX - (x - width/2) / (0.5 * zoom * width);
+            offsetY = fractalY - (y - height/2) / (0.5 * zoom * height);
+            
+            updateParamDisplay();
+            generateJuliaSet();
+        });
+
+        // Scroll to project section
         function scrollToProject() {
             document.querySelector('.project-section').scrollIntoView({ behavior: 'smooth' });
         }
+
+        // Initialize the application
+        function init() {
+            initPresetGallery();
+            updateParamDisplay();
+            generateJuliaSet();
+        }
+
+        // Start the application
+        init();
     </script>
 </body>
-</html> 
+</html>
